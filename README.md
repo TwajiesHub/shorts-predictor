@@ -4,10 +4,12 @@ A lite neural net that scores a **draft YouTube Shorts title** (plus duration, p
 
 This is a small, reusable pipeline: collect public metadata, train a compact model, and score drafts locally. It is not a guaranteed view forecast.
 
-Two model versions ship in this repo:
+Five compatible model versions ship in this repo:
 
 - **v1** — title text + numeric features only (`models/model_v1.joblib`)
 - **v2** (default) — v1 features plus thumbnail embeddings and interpretable image traits (`models/model_v2.joblib`)
+- **v3** — lightweight title and thumbnail ranking features.
+- **v4 / v5** (best validated ranking) — **60.54% held-out all-pair accuracy**; v5 preserves the v4 head because later additions did not pass selection. Use `python scripts/predict.py "Title A" "Title B" --model v5`. Optional proxy rules remain off by default.
 
 The example target channel, [TestRun](https://www.youtube.com/@testru7) (`UCExmWKJ2B0tAC0FT3c0YHeg`), was **held out of training**. Public view counts in the reports are as collected on 15 Nov 2026.
 
@@ -23,6 +25,238 @@ pip install -r requirements.txt
 ```
 
 Python 3.11+ is recommended. Training and CLIP feature extraction run on CPU.
+
+## Lightweight ranking model (v3, opt-in)
+
+Use the same CLI with `--model v3`; `auto`, v1, and v2 retain their existing behavior:
+
+```bash
+python scripts/predict.py "Why Is My iPhone Storage Missing?" "Your iPhone Storage Is Lying" --model v3 --duration 30
+python scripts/predict.py "Example title" --model v3 --thumbnail a.jpg --thumbnail b.jpg --json
+# Supply a known recent baseline for your channel instead of the default TestRun context:
+python scripts/predict.py "Example title" --model v3 --channel-id MY_CHANNEL --subscribers 1000 --recent-median-views 500
+python scripts/train_v3.py                  # train, select, calibrate, evaluate + ablations
+python scripts/train_v3.py --evaluate-only  # evaluate saved v3 without refitting
+python scripts/benchmark_v3.py              # CPU latency/memory, including image processing
+python -m unittest discover -s tests -v
+```
+
+V3 adds a fixed-size word/bigram and character 3–5-gram hashing representation,
+compressed to 64 dimensions, plus power-word counts, individual emoji counts,
+number/question counts, length buckets, masked cyclical posting times, subscriber
+tiers/interactions, and title-length/duration differences from channel history.
+Baselines use fitting rows only, excluding the video itself. Recent history uses
+up to 20 strictly earlier exact-dated rows; coarse dates use channel context without
+claiming a chronology. The optional recent median overrides this fallback at inference.
+TestRun stays excluded from training, selection, and calibration; its cached recent
+context is used only for draft inference. Snapshot view counts cannot reconstruct
+what a channel's baseline actually was at a past posting time.
+
+Thumbnail processing uses existing cached brightness, contrast, faces, edge density,
+and colorfulness, plus exposure-adjusted contrast, face prominence, edge/color
+interaction, and usable-exposure fraction. It uses small OpenCV measurements only:
+**no CLIP/torch loading or weight downloads in v3 inference**. Repeated image paths
+are measured once per request; missing thumbnails are imputed, with matching dropout
+during training. Existing v2 thumbnail/embedding caches and models remain intact.
+
+The training code adds channel-balanced RankNet logistic pair loss on shallow trees,
+including a gap-weighted variant that downweights near-tied outcomes. It starts from
+a small robust regression head. A separate inner selection split chooses the number
+of pairwise corrections, including zero; a disjoint calibration split fits a positive
+affine relative-score mapping and an empirical pair-reliability model. In this dataset,
+**selection rejected both pairwise variants and retained the regression head**.
+The ranking loss is available explicitly with `python scripts/train_v3.py --objective pairwise`
+(replaces only v3); it has not demonstrated a gain here. No new dependencies are needed.
+
+`ranking_score` orders drafts; `score` / `relative_score` is the calibrated log-view
+residual, and `niche_percentile` uses inner-validation predictions. `--json` also returns
+empirical comparison reliability (against the top alternative, or runner-up for the
+winner), an 80% validation absolute-error radius, and low-confidence reasons such as
+close scores, missing thumbnails, little history, or an unseen channel. A single draft
+has no pair reliability (`null`); identical drafts get 50%. These diagnostics and the
+rough 14-day view translation are not guarantees of future views.
+
+On this CPU, three drafts took about 46 ms after loading, or 250 ms with three
+1920×1080 thumbnail files (about 1.8 s import/load, 348 MiB peak benchmark RSS,
+7.25 MiB model). Measurements and the reproducible benchmark are in
+`reports/benchmark_v3.json`; other machines and images will differ.
+
+The seed-42 held-out set has 980 videos; v3 reserves 3,130 fitting, 391 selection,
+and 391 calibration rows from the original 3,912 training rows. Exact pair accuracies:
+
+| Model / input | All pairs | Within-channel pairs |
+|---|---:|---:|
+| v1 | 54.77% | 53.06% |
+| v2 | 56.41% | 56.38% |
+| v3 selected head | 57.84% | 58.00% |
+| v2, no thumbnail input | 53.24% | 52.92% |
+| v3, no thumbnail input | 53.90% | 54.29% |
+
+These are **modest improvements**, not the substantial lift originally sought.
+V3 Spearman is 0.22508926609182808 versus v2's 0.18930098198462808.
+The no-thumbnail-input comparison holds thumbnail features at a common imputed
+reference; it is a proxy for title comparison, not a randomized title experiment.
+The outer development split was reused during implementation; fresh prospective
+validation is still needed. Most dates are approximate, so this is not a future-time
+validation. Full precision, calibration diagnostics, channel-bootstrap uncertainty,
+objective selection, and retrained feature ablations are in `reports/metrics_v3.json`;
+`--evaluate-only` writes `reports/evaluation_v3.json` and checks the dataset fingerprint.
+Model selection does not use outer scores, and no ablation is silently promoted.
+
+## Research-backed lightweight features (v4, opt-in)
+
+V4 adds **sentiment/title-structure summaries** from a small
+[VADER valence lexicon](https://github.com/cjhutto/vaderSentiment), plus
+**cross-fitted historical title priors** from similar Shorts in the training set.
+This uses sparse word/bigram similarity, a small Ridge prior, and a shallow tree
+head. No LLM, new vision model, API call, or new dependency is needed at inference.
+V1/v2/v3 remain available and `auto` still selects v2.
+
+```bash
+python scripts/predict.py "Title A" "Title B" --model v4
+python scripts/predict.py "Title A" --thumbnail a.jpg --thumbnail b.jpg --model v4 --json
+python scripts/train_v4.py                  # train-only selection, calibration, held-out comparison
+python scripts/train_v4.py --evaluate-only  # reproduce saved-model evaluation
+python scripts/benchmark_v4.py              # CPU timings, including thumbnail processing
+```
+
+On the same 980 held-out videos, **v3 → v4 all-pairs accuracy is 57.84% → 60.54%**;
+within-channel accuracy is **58.00% → 59.74%**. Without thumbnail input, all-pairs
+accuracy improves **53.90% → 58.84%**. Spearman rises from 0.22508926609182808 to
+0.3037112176128674. Exact metrics, a repeated-title overlap audit, calibration,
+and channel-bootstrap uncertainty are in `reports/metrics_v4.json`. This is a
+reused development holdout; prospective gains are not yet established.
+On this CPU, three drafts took about **81 ms** after loading, or **426 ms** with
+three full-size thumbnails; import/loading took 2.8 seconds. The model is 7.7 MiB,
+with about 348 MiB peak benchmark RSS and no torch/CLIP loaded. See
+`reports/benchmark_v4.json` for the measurements.
+
+We screened public datasets, including a [synthetic Shorts/TikTok dataset](https://github.com/tarekmasryo/youtube-tiktok-trends-dataset-2025)
+and a [larger research Shorts dataset](https://github.com/JamilAL01/YouTube-Shorts-Dataset),
+and did not merge incompatible outcomes. Novelty heuristics did not win selection.
+Sentiment alone did not help; the selected language-plus-priors bundle did.
+No universal "power word" or thumbnail-CTR claim is assumed.
+See [research sources, exclusions, cross-fitting, and ablations](docs/research_v4.md).
+The pinned external lexicon has its MIT license and checksum manifest under
+`data/lexicons/`; `python scripts/collect_v4_resources.py` rebuilds it. Normal
+prediction works offline from the bundled resources and retains v3's reliability
+notes, calibrated relative score, percentile, and rough view estimate.
+
+## Public-data and emotional-cue experiment (v5)
+
+```bash
+python scripts/predict.py "Title A" "Title B" --model v5 --json
+python scripts/collect_v5_public.py --source snapshot
+python scripts/train_v5.py
+python scripts/train_v5.py --evaluate-only
+python scripts/benchmark_v5.py
+```
+
+V5 implements expanded cross-fitted title priors and ten interpretable emotional
+cue scores: curiosity, urgency/scarcity, FOMO, surprise, relatability, status,
+humor, outrage, direct address, and numbers/lists. Editable regex weights and
+normalization are in `data/lexicons/emotional_triggers_v5.json`. They approximate
+title cues, not actual human reactions or guaranteed performance effects.
+
+**No new ranking feature passed selection**, so shipped v5 keeps v4 predictions:
+**60.54% all-pairs, 59.74% within-channel, and 58.84% all-pairs without thumbnail**.
+JSON exposes the descriptive cue scores with
+`emotional_triggers_used_for_ranking: false`. No accuracy gain is claimed.
+The retrained emotional-only candidate gained 0.47 percentage point on inner
+selection, below the unchanged 0.50-point retention threshold; pairwise corrections
+also failed retention. V1–v4 and the `auto` default remain unchanged.
+
+The public fallback supplied **542 additional examples / 120 channels** after
+screening 68,699 records from [JamilAL01's Shorts snapshot](https://github.com/JamilAL01/YouTube-Shorts-Dataset).
+They were published May 2023–April 2025, not recently collected 2026 counts.
+No API key was configured and API/RSS access was proxy-blocked. Fresh API
+collection requires `YOUTUBE_API_KEY` and access to `www.googleapis.com`; the
+collector avoids search calls and bounds uploads/statistics requests. The retained
+public data has **CC BY-NC 4.0** terms and attribution in `data/PUBLIC_DATA_V5.md`.
+
+See [sources, exact collection counts, cue rules, API limits, and results](docs/research_v5.md),
+`reports/metrics_v5.json`, and `reports/benchmark_v5.json`. The new priors are
+available for controlled retraining but are inactive in the shipped ranking path.
+On this CPU, shipped v5 took about **55 ms for three titles** or **272 ms with
+three full-size thumbnails** after loading; import/loading took 2.3 seconds.
+The 7.7 MiB bundle loaded no torch/CLIP; peak benchmark RSS was about 361 MiB.
+
+## Optional proxy score adjustments (v4/v5)
+
+```bash
+python scripts/predict.py "Title A" "Title B" --model v5 --apply-rules --json
+python scripts/evaluate_proxy_rules.py
+python scripts/benchmark_proxy_rules.py
+```
+
+`--apply-rules` adds `adjusted_score`, `adjusted_rank`, matched rules, and proxy
+context. It is **off by default** and never retrains or changes the core model.
+Original scores, ranking/order, percentiles, confidence, and view estimates remain
+unchanged. Adjusted scores are uncalibrated heuristic scores, clipped to **[−3, 3]**.
+
+| Explicit proxy rule | Score increment |
+|---|---:|
+| Emotional strength ≥0.7 + channel prior ≥70th percentile | +0.08 |
+| Emotional strength ≤0.3 + channel prior ≤30th percentile | −0.06 |
+| High curiosity + length within channel's historical sweet spot | +0.05 |
+| High outrage + low historical outrage-style proxy | −0.04 |
+| At least three triggers + poor measured thumbnail stats | −0.03 |
+| No triggers + very similar to recent channel-average title | −0.04 |
+
+Strength is the maximum existing trigger score; “high” means ≥0.7. Channel prior
+uses existing same-channel title priors and tied midpoint percentiles. Missing
+context skips the corresponding gate; missing thumbnails are not labeled poor.
+The outrage-style proxy is not a measured toxicity label.
+
+| Held-out metric | Original | Adjusted | Change |
+|---|---:|---:|---:|
+| All pairs | 60.538% | 60.620% | +0.082 pp |
+| Within-channel | 59.737% | 59.945% | +0.208 pp |
+| No-thumbnail, all pairs | 58.844% | 58.950% | +0.106 pp |
+| No-thumbnail, within-channel | 57.582% | 57.740% | +0.157 pp |
+
+The gains are small and equal-channel macro accuracy falls slightly with
+thumbnails, so the rules remain opt-in. Only the two emotion/prior gates fired in
+this evaluation. Warm CPU overhead was about **9 ms for three drafts**, reusing
+thumbnail stats. See [thresholds, proxy definitions, cache provenance, and limits](docs/proxy_rules.md),
+`reports/proxy_rules_evaluation.json`, and `reports/proxy_rules_benchmark.json`.
+The 980 frozen v5 predictions are cached for reproducibility; no models were changed.
+
+## Feature importance and group ablation
+
+```bash
+python scripts/feature_importance.py --model v5
+# Fast masking alternative (separate report):
+python scripts/feature_importance.py --model v5 --ablation mask
+```
+
+The current v4/v5 head has 172 active columns. On the original 980 held-out videos:
+
+| Removed group (retrained head) | Overall accuracy | Drop |
+|---|---:|---:|
+| Nothing — full model | 60.538% | — |
+| Channel context + performance priors | 58.314% | 2.224 pp |
+| Cheap thumbnail features | 58.771% | 1.767 pp |
+| Title structure/readability | 59.667% | 0.871 pp |
+| Subscriber size/interactions | 60.006% | 0.532 pp |
+| Standalone title n-grams/SVD | 60.446% | 0.092 pp |
+| Posting time | 60.470% | 0.068 pp |
+| Sentiment lexicon | 60.511% | 0.027 pp |
+| Duration | 60.540% | −0.002 pp |
+| Explicit v5 emotional triggers | 60.538% | 0.000 pp — inactive |
+
+Ten-repeat permutation importance also ranks **priors, cheap thumbnails, and title
+structure** highest. Sentiment adds little; explicit v5 triggers, extra public-data
+priors, novelty, and CLIP embeddings are absent from the shipped head. SVD removal
+improves within-channel accuracy but hurts overall no-thumbnail accuracy: title
+information still reaches the model through priors, so this is not a title-input
+removal or a recommendation to drop text.
+
+The analysis includes global/within-channel permutations, retrained and masked
+ablations, native split importance, and auxiliary Ridge coefficients in
+`reports/feature_importance_v5.json`. Full-head reproduction matched saved
+predictions exactly; no production models or default behavior changed. Runtime
+was about 2.5 minutes on CPU. See [feature groups, full results, split, and limitations](docs/feature_importance.md).
 
 ## Predict
 
@@ -204,3 +438,9 @@ src/thumb_features.py
 ## License
 
 MIT. See `LICENSE`.
+
+## Thumbnail palette research
+
+Run `python scripts/analyze_palettes.py --source cached` for reproducible distributions and a temporary v5 ablation. Cached-color encodings reduced held-out all-pair accuracy **60.538% → 60.118% (−0.420 pp)**; they are excluded from prediction. No color statistic showed a consistent channel-balanced difference after multiple-testing checks.
+
+A deterministic, CPU-only top-five palette extractor is implemented, but its real-image ranking evaluation remains pending: thumbnail files are absent and `i.ytimg.com` is still blocked in the running environment (the authorized allowlist change is saved in the environment draft). After applying access, run `python scripts/analyze_palettes.py --download --source pixels`. v1–v5 defaults remain unchanged. See [palette research notes](docs/palettes.md) for exact features, split, timing caveats and results; full numbers are in [JSON](reports/palette_analysis_cached.json) and [CSV](reports/palette_distributions_cached.csv).

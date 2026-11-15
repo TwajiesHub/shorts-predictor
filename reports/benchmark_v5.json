@@ -1,0 +1,20 @@
+{
+  "load_and_import_seconds": 2.2880211360006797,
+  "timings": {
+    "titles_only": {
+      "first_seconds": 0.10969562999980553,
+      "median_seconds": 0.05548190300032729
+    },
+    "shared_thumbnail": {
+      "first_seconds": 0.2222810049997861,
+      "median_seconds": 0.12855143300021155
+    },
+    "three_thumbnails": {
+      "first_seconds": 0.2723267669998677,
+      "median_seconds": 0.2723267669998677
+    }
+  },
+  "peak_rss_mib": 360.7109375,
+  "model_mib": 7.6720123291015625,
+  "torch_or_clip_loaded": false
+}

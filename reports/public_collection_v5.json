@@ -1,0 +1,67 @@
+{
+  "retrieved_at": "2026-11-15T15:17:55.773360+00:00",
+  "source": {
+    "source": "https://raw.githubusercontent.com/JamilAL01/YouTube-Shorts-Dataset/60d8f38921e43ec1eac227e2b89e2d0c12ec4d15/shorts_metadata.json",
+    "revision": "60d8f38921e43ec1eac227e2b89e2d0c12ec4d15",
+    "raw_sha256": "f767db96ddb148a6905a55543fb28db8fe53531cd0637691290e55fe0ead7f15",
+    "raw_records": 68699,
+    "raw_bytes": 68536032,
+    "license": "CC BY-NC 4.0",
+    "attribution": "JamilAL01 / YouTube-Shorts-Dataset",
+    "observed_at": null,
+    "note": "Original view-count observation times are not provided; retrieval time is not a fresh view-count observation."
+  },
+  "fallback_reason": "No YouTube API key configured; this run used the public snapshot. API/RSS probes were proxy-blocked.",
+  "api_credential_present": false,
+  "authenticated_api_requests_made": {},
+  "counts": {
+    "input_rows": 68699,
+    "invalid_or_outside_short_duration": 446,
+    "duplicate_video_ids": 0,
+    "excluded_original_ids_titles_or_testrun": 6581,
+    "older_than_two_years_within_source": 10052,
+    "non_latin_script": 651,
+    "insufficient_channel_quarter_support": 39314,
+    "outside_matching_niches": 11113,
+    "per_channel_cap": 0,
+    "global_cap": 0,
+    "retained": 542
+  },
+  "channels": 120,
+  "publication_range": [
+    "2023-05-25T11:40:16+00:00",
+    "2025-04-08T06:30:25+00:00"
+  ],
+  "view_count_range": [
+    0,
+    188153569
+  ],
+  "median_views": 12308.0,
+  "matched_original_channels": 0,
+  "short_duration_range": [
+    5.0,
+    165.0
+  ],
+  "normalized_target": "clip(log1p(views)-log1p(channel/publication-quarter median views), -3, 3); cohort >=5",
+  "output_sha256": "914c622cc58f56231fe2a2dbf643124b76c9788f56cca902462fa90b213d5178",
+  "fields": [
+    "video_id",
+    "title",
+    "channel_id",
+    "published_at",
+    "duration",
+    "views",
+    "category_name",
+    "source",
+    "observed_at",
+    "publication_cohort",
+    "cohort_size",
+    "cohort_median_views",
+    "prior_target"
+  ],
+  "limitations": [
+    "Snapshot is older, not a live/recent-2026 collection",
+    "Latin-script filtering is not verified language identification",
+    "Public source is observational/popularity-selected, not randomized title tests"
+  ]
+}

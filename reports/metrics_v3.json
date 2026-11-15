@@ -1,0 +1,163 @@
+{
+  "v1": {
+    "n": 980,
+    "spearman": 0.14235487108832698,
+    "all_pairs_accuracy": 0.547691223563947,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5306139791799448,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.5761093937970838
+  },
+  "v2": {
+    "n": 980,
+    "spearman": 0.18930098198462808,
+    "all_pairs_accuracy": 0.5641074287811061,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5637561079243679,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.5152906189963339
+  },
+  "regression_same_features": {
+    "n": 980,
+    "spearman": 0.22508926609182808,
+    "all_pairs_accuracy": 0.5784491960771232,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.579987253027406,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.6130481782845294
+  },
+  "no_title_hash": {
+    "n": 980,
+    "spearman": 0.2180933549822104,
+    "all_pairs_accuracy": 0.5765238258055908,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5913533035903973,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.5956663139006145
+  },
+  "no_thumbnail": {
+    "n": 980,
+    "spearman": 0.1328695132469687,
+    "all_pairs_accuracy": 0.5447526102475149,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5414701508391757,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.5421939041782406
+  },
+  "no_channel_context": {
+    "n": 980,
+    "spearman": 0.2451092087643031,
+    "all_pairs_accuracy": 0.5840866635532724,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5717867006585936,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.6036173904996952
+  },
+  "v3": {
+    "n": 980,
+    "spearman": 0.22508926609182808,
+    "all_pairs_accuracy": 0.5784491960771232,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.579987253027406,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.6130481782845294,
+    "pair_reliability_brier": 0.23516645770786873,
+    "pair_reliability_mean": 0.5840818054699894,
+    "sampled_pair_actual_accuracy": 0.6146362663813854,
+    "calibrated_mae": 1.1649188177440988,
+    "zero_relative_mae": 1.1848854326992024,
+    "empirical_80pct_error_coverage": 0.7704081632653061
+  },
+  "v3_without_thumbnail_input": {
+    "n": 980,
+    "spearman": 0.11525933517916166,
+    "all_pairs_accuracy": 0.5390473847488157,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.54289356277884,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.5573782066948361
+  },
+  "v2_without_thumbnail_input": {
+    "n": 980,
+    "spearman": 0.100761842651532,
+    "all_pairs_accuracy": 0.5323925045033024,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.529169322285957,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.5125535139779365
+  },
+  "channel_macro_lift_vs_v2_95pct_interval": [
+    0.030848948879332847,
+    0.18984421717617536
+  ],
+  "protocol": {
+    "outer_seed": 42,
+    "outer_train": 3912,
+    "outer_test": 980,
+    "fitting": 3130,
+    "calibration": 391,
+    "selection": 391,
+    "pairwise_correction_trees": 0,
+    "testrun_excluded": true,
+    "objective": "inner-selected regression warm-start plus channel-balanced RankNet corrections",
+    "selected_head": "regression_trees",
+    "gap_weighted": false,
+    "target": "v1 age coefficients; training-only baseline for v3 fitting/calibration; legacy target for common ranking comparison",
+    "caveats": [
+      "Random per-channel split, not future performance validation",
+      "Development holdout reused across implementation iterations; fresh prospective validation still needed",
+      "Most timestamps approximate; recent exact history often unavailable",
+      "Snapshot views cannot reconstruct point-in-time channel outcomes",
+      "Legacy v1/v2 trained on more rows than v3, which reserves inner calibration rows"
+    ]
+  },
+  "runtime_seconds": 132.429868682,
+  "inner_selection_candidates": [
+    [
+      0.5502484815019326,
+      0,
+      false
+    ],
+    [
+      0.537548315847598,
+      30,
+      false
+    ],
+    [
+      0.5350635008282717,
+      60,
+      false
+    ],
+    [
+      0.5323025952512425,
+      120,
+      false
+    ],
+    [
+      0.5336830480397571,
+      180,
+      false
+    ],
+    [
+      0.5455549420209829,
+      30,
+      true
+    ],
+    [
+      0.5411374930977361,
+      60,
+      true
+    ],
+    [
+      0.5328547763666482,
+      120,
+      true
+    ],
+    [
+      0.5336830480397571,
+      180,
+      true
+    ]
+  ],
+  "data_fingerprint": "2dd04b610940a1ab39ee7119c8ca188a3984608fe8091c1825ab74a58bc8229b"
+}

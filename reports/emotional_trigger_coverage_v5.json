@@ -1,0 +1,32 @@
+{
+  "original_fitting": {
+    "n": 3130,
+    "nonzero_counts": {
+      "curiosity_gap": 1700,
+      "urgency_scarcity": 29,
+      "fomo": 5,
+      "surprise_shock": 12,
+      "relatability": 18,
+      "status_superiority": 9,
+      "humor": 7,
+      "controversy_outrage": 14,
+      "direct_address": 283,
+      "numbers_lists": 1147
+    }
+  },
+  "external_public": {
+    "n": 542,
+    "nonzero_counts": {
+      "curiosity_gap": 55,
+      "urgency_scarcity": 0,
+      "fomo": 6,
+      "surprise_shock": 30,
+      "relatability": 2,
+      "status_superiority": 3,
+      "humor": 20,
+      "controversy_outrage": 1,
+      "direct_address": 48,
+      "numbers_lists": 120
+    }
+  }
+}

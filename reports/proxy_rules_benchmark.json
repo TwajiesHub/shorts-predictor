@@ -1,0 +1,21 @@
+{
+  "rule_context_init_seconds": 0.008404223999605165,
+  "timings": {
+    "titles_only": {
+      "off_median_seconds": 0.05401465399972949,
+      "on_median_seconds": 0.06310519200087583,
+      "overhead_seconds": 0.009090538001146342,
+      "overhead_percent": 16.82976253294499,
+      "paired_requests": 10
+    },
+    "three_thumbnails": {
+      "off_median_seconds": 0.2807330235000336,
+      "on_median_seconds": 0.2898387659997752,
+      "overhead_seconds": 0.00910574249974161,
+      "overhead_percent": 3.243559445275057,
+      "paired_requests": 10
+    }
+  },
+  "titles_with_fresh_rule_context_median_seconds": 0.08740248399953998,
+  "torch_or_clip_loaded": false
+}

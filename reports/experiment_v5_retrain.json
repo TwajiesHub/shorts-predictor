@@ -1,0 +1,192 @@
+{
+  "protocol": {
+    "outer_test": 980,
+    "fitting": 3130,
+    "selection": 391,
+    "calibration": 391,
+    "testrun_excluded": true,
+    "selection_metric": "within-channel pairwise accuracy; minimum inner lift 0.5 percentage point",
+    "cross_fitting": "5 GroupKFold folds across original fitting + external normalized titles",
+    "external_source_weight": 0.35,
+    "external_rows": 542,
+    "original_data_unchanged": true,
+    "caveats": [
+      "Reused development holdout; fresh prospective evaluation still needed",
+      "External snapshot is older and has unknown count-observation timestamps",
+      "Emotional scores are hand-authored cue heuristics, not measured human reactions"
+    ]
+  },
+  "data_fingerprint": "2dd04b610940a1ab39ee7119c8ca188a3984608fe8091c1825ab74a58bc8229b",
+  "public_data_sha256": "914c622cc58f56231fe2a2dbf643124b76c9788f56cca902462fa90b213d5178",
+  "emotional_rules_sha256": "148f0acf704811abbccd07f44f461b09c058fc76002d5ecb7924f26df64ad2a9",
+  "selected_groups": [],
+  "candidate_selection": [
+    {
+      "groups": [],
+      "n": 391,
+      "spearman": 0.18373700756762443,
+      "all_pairs_accuracy": 0.5631271725585361,
+      "all_pairs": 76235,
+      "within_channel_accuracy": 0.5646051905024848,
+      "within_channel_pairs": 3622,
+      "channel_macro_accuracy": 0.5271258512280856
+    },
+    {
+      "groups": [
+        "emotions"
+      ],
+      "n": 391,
+      "spearman": 0.1981029290879975,
+      "all_pairs_accuracy": 0.5682035810323343,
+      "all_pairs": 76235,
+      "within_channel_accuracy": 0.5692987299834346,
+      "within_channel_pairs": 3622,
+      "channel_macro_accuracy": 0.5331541591973682
+    },
+    {
+      "groups": [
+        "public_priors"
+      ],
+      "n": 391,
+      "spearman": 0.2062839652143923,
+      "all_pairs_accuracy": 0.5698038958483637,
+      "all_pairs": 76235,
+      "within_channel_accuracy": 0.5651573716178907,
+      "within_channel_pairs": 3622,
+      "channel_macro_accuracy": 0.5220060996545719
+    },
+    {
+      "groups": [
+        "public_priors",
+        "emotions"
+      ],
+      "n": 391,
+      "spearman": 0.21023370782617853,
+      "all_pairs_accuracy": 0.5716272053518725,
+      "all_pairs": 76235,
+      "within_channel_accuracy": 0.5665378244064053,
+      "within_channel_pairs": 3622,
+      "channel_macro_accuracy": 0.5216052489784486
+    }
+  ],
+  "collection": {
+    "retrieved_at": "2026-11-15T15:17:55.773360+00:00",
+    "source": {
+      "source": "https://raw.githubusercontent.com/JamilAL01/YouTube-Shorts-Dataset/60d8f38921e43ec1eac227e2b89e2d0c12ec4d15/shorts_metadata.json",
+      "revision": "60d8f38921e43ec1eac227e2b89e2d0c12ec4d15",
+      "raw_sha256": "f767db96ddb148a6905a55543fb28db8fe53531cd0637691290e55fe0ead7f15",
+      "raw_records": 68699,
+      "raw_bytes": 68536032,
+      "license": "CC BY-NC 4.0",
+      "attribution": "JamilAL01 / YouTube-Shorts-Dataset",
+      "observed_at": null,
+      "note": "Original view-count observation times are not provided; retrieval time is not a fresh view-count observation."
+    },
+    "fallback_reason": "No YouTube API key configured; this run used the public snapshot. API/RSS probes were proxy-blocked.",
+    "api_credential_present": false,
+    "authenticated_api_requests_made": {},
+    "counts": {
+      "input_rows": 68699,
+      "invalid_or_outside_short_duration": 446,
+      "duplicate_video_ids": 0,
+      "excluded_original_ids_titles_or_testrun": 6581,
+      "older_than_two_years_within_source": 10052,
+      "non_latin_script": 651,
+      "insufficient_channel_quarter_support": 39314,
+      "outside_matching_niches": 11113,
+      "per_channel_cap": 0,
+      "global_cap": 0,
+      "retained": 542
+    },
+    "channels": 120,
+    "publication_range": [
+      "2023-05-25T11:40:16+00:00",
+      "2025-04-08T06:30:25+00:00"
+    ],
+    "view_count_range": [
+      0,
+      188153569
+    ],
+    "median_views": 12308.0,
+    "matched_original_channels": 0,
+    "short_duration_range": [
+      5.0,
+      165.0
+    ],
+    "normalized_target": "clip(log1p(views)-log1p(channel/publication-quarter median views), -3, 3); cohort >=5",
+    "output_sha256": "914c622cc58f56231fe2a2dbf643124b76c9788f56cca902462fa90b213d5178",
+    "fields": [
+      "video_id",
+      "title",
+      "channel_id",
+      "published_at",
+      "duration",
+      "views",
+      "category_name",
+      "source",
+      "observed_at",
+      "publication_cohort",
+      "cohort_size",
+      "cohort_median_views",
+      "prior_target"
+    ],
+    "limitations": [
+      "Snapshot is older, not a live/recent-2026 collection",
+      "Latin-script filtering is not verified language identification",
+      "Public source is observational/popularity-selected, not randomized title tests"
+    ]
+  },
+  "v4": {
+    "n": 980,
+    "spearman": 0.3037112176128674,
+    "all_pairs_accuracy": 0.6053814463940222,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5973656256639048,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.6175731080884085
+  },
+  "v4_without_thumbnail_input": {
+    "n": 980,
+    "spearman": 0.25809410349305556,
+    "all_pairs_accuracy": 0.5884398558943225,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5758232419800298,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.5793573796619517
+  },
+  "v5": {
+    "n": 980,
+    "spearman": 0.3037112176128674,
+    "all_pairs_accuracy": 0.6053814463940222,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5973656256639048,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.6175731080884085
+  },
+  "v5_without_thumbnail_input": {
+    "n": 980,
+    "spearman": 0.25809410349305556,
+    "all_pairs_accuracy": 0.5884398558943225,
+    "all_pairs": 479648,
+    "within_channel_accuracy": 0.5758232419800298,
+    "within_channel_pairs": 23535,
+    "channel_macro_accuracy": 0.5793573796619517
+  },
+  "paired_channel_bootstrap_vs_v4": {
+    "within_channel_lift_95pct": [
+      0.0,
+      0.0
+    ],
+    "channel_macro_lift_95pct": [
+      0.0,
+      0.0
+    ]
+  },
+  "calibration": {
+    "mae": 1.1349125097297652,
+    "zero_relative_mae": 1.1848854326992024,
+    "error_radius_80pct": 1.602494492242368,
+    "empirical_error_radius_coverage": 0.7642857142857142
+  },
+  "runtime_seconds": 80.2935812629994
+}

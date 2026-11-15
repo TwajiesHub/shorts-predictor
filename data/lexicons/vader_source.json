@@ -1,0 +1,15 @@
+{
+  "revision": "44fc044cd877310ee8278a0eadf34bcd50d41d06",
+  "files": {
+    "vaderSentiment/vader_lexicon.txt": {
+      "url": "https://raw.githubusercontent.com/cjhutto/vaderSentiment/44fc044cd877310ee8278a0eadf34bcd50d41d06/vaderSentiment/vader_lexicon.txt",
+      "sha256": "ec636f884f36b5de6a4d681b2f61c08c2ec90eeb440472033f3307d0d6fa8bc9",
+      "bytes": 426786
+    },
+    "LICENSE.txt": {
+      "url": "https://raw.githubusercontent.com/cjhutto/vaderSentiment/44fc044cd877310ee8278a0eadf34bcd50d41d06/LICENSE.txt",
+      "sha256": "b78925304c567623f14677bad66b8e305e7ddcaf7982c8d8411ce51c55a8bf51",
+      "bytes": 1076
+    }
+  }
+}

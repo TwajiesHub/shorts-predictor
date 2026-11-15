@@ -1,0 +1,8 @@
+{
+  "model_sha256": "cece9eb919f6c441c19cab77fcf887c88339c50a8f4f5ca84cc278f060ced967",
+  "data_fingerprint": "2dd04b610940a1ab39ee7119c8ca188a3984608fe8091c1825ab74a58bc8229b",
+  "rows": 980,
+  "predictions_sha256": "4dde36a24f82f820b40ab525b5fd50efe9f3fd4c9132e325d4746f0a3e7527ac",
+  "provenance": "Materialized from unchanged saved v5; no training",
+  "score_definition": "R is calibrated relative score, not raw ranking_score"
+}

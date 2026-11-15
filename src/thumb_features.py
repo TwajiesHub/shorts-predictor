@@ -76,7 +76,7 @@ def is_amazon_url(url: str) -> bool:
 
 
 def is_allowed_thumb_url(url: str) -> bool:
-    """Allow local-style http(s) image URLs except Amazon/affiliate hosts."""
+    """Only public YouTube thumbnail images may be fetched."""
     try:
         p = urlparse(url)
     except Exception:
@@ -85,7 +85,7 @@ def is_allowed_thumb_url(url: str) -> bool:
         return False
     if is_amazon_url(url):
         return False
-    return True
+    return p.hostname == "i.ytimg.com"
 
 
 def _load_bgr(path: str | Path) -> np.ndarray | None:

@@ -65,6 +65,8 @@ def resolve_model_path(which: str | None) -> Path:
         return MODEL_V2_PATH
     if which == "v1":
         return MODEL_V1_PATH if MODEL_V1_PATH.exists() else MODEL_PATH
+    if which in ("v3", "v4", "v5"):
+        return ROOT / f"models/model_{which}.joblib"
     path = Path(which)
     return path
 
@@ -183,6 +185,9 @@ def stored_thumb_block(bundle, video_ids: list[str]) -> np.ndarray:
     feats = pd.read_parquet(THUMB_FEATURES_PATH).set_index("video_id")
     blob = np.load(THUMB_EMBEDDINGS_PATH, allow_pickle=True)
     id_to_row = {str(v): i for i, v in enumerate(blob["video_id"].astype(str))}
+    # NPZ members decompress on every access; load each large member once.
+    cached_embeddings = blob["embedding"]
+    cached_has_embedding = blob["has_embedding"]
     interp_rows = []
     emb_rows = []
     for vid in video_ids:
@@ -192,8 +197,8 @@ def stored_thumb_block(bundle, video_ids: list[str]) -> np.ndarray:
         else:
             interp_rows.append([float(med.get(c, 0.0)) for c in cols])
         j = id_to_row.get(str(vid))
-        if j is not None and blob["has_embedding"][j]:
-            emb_rows.append(blob["embedding"][j].astype(np.float32))
+        if j is not None and cached_has_embedding[j]:
+            emb_rows.append(cached_embeddings[j].astype(np.float32))
         else:
             emb_rows.append(mean_emb if mean_emb.size else np.zeros(512, dtype=np.float32))
     interp = np.asarray(interp_rows, dtype=float)
@@ -242,7 +247,12 @@ def predict_scores(
     channel_id: str | None = None,
     thumb_paths: list[Path | None] | None = None,
     used_imputed_thumb: bool | None = None,
+    recent_median_views: float | None = None,
+    apply_rules: bool = False,
+    rules_context=None,
 ) -> pd.DataFrame:
+    if apply_rules and bundle.get("version") not in ("v4", "v5"):
+        raise ValueError("--apply-rules supports v4/v5 only")
     if subscribers is None:
         subscribers = bundle.get("testrun_subscribers") or 8.0
     channel_id = channel_id or bundle.get("testrun_channel_id") or TESTRUN_CHANNEL_ID
@@ -257,6 +267,32 @@ def predict_scores(
             used_imputed_thumb = is_v2(bundle)
 
     df = _rows_for_titles(titles, duration, when, subscribers, channel_id)
+    if bundle.get("version") in ("v3", "v4", "v5"):
+        from src.ranking import attach_thumbnails, draft_output
+        extra_rule_history = None
+        if recent_median_views is not None:
+            df["recent_median_views"] = recent_median_views
+        elif channel_id == TESTRUN_CHANNEL_ID:
+            # Inference-only context, never fed into fitting or held-out evaluation.
+            history = pd.read_parquet(VIDEOS_PATH)
+            history = history[history.channel_id == channel_id].sort_values("published_ts").tail(20)
+            extra_rule_history = history
+            if len(history):
+                df["recent_median_views"] = float(history.views.median())
+                df["recent_duration"] = float(history.duration.median())
+                df["recent_title_length"] = float(history.title.str.len().median())
+                df["recent_count"] = len(history)
+        df["thumbnail"] = ["imputed" if p is None else str(p) for p in thumb_paths]
+        enriched = attach_thumbnails(df, paths=thumb_paths)
+        out = draft_output(bundle, enriched)
+        if bundle.get("version") == "v5":
+            out["emotional_triggers"] = [bundle["features"].emotion_scores(t) for t in out.title]
+            out["emotional_triggers_used_for_ranking"] = "emotions" in bundle.get("selected_groups", [])
+        if apply_rules:
+            from src.proxy_rules import ProxyRuleContext
+            context = rules_context if rules_context is not None else ProxyRuleContext(bundle)
+            out = context.apply(enriched,out,extra_history=extra_rule_history)
+        return out
     X_num = build_numeric_frame(df, default_duration=duration, default_subscribers=subscribers)
     T = title_block(bundle, df["title"].astype(str).tolist())
     if is_v2(bundle):
@@ -287,7 +323,9 @@ def predict_titles(bundle, titles, duration, when, subscribers=None, channel_id=
     return predict_scores(bundle, titles, duration, when, subscribers, channel_id, **kwargs)
 
 
-def score_existing_shorts(bundle) -> pd.DataFrame:
+def score_existing_shorts(bundle, apply_rules=False, rules_context=None) -> pd.DataFrame:
+    if apply_rules and bundle.get("version") not in ("v4", "v5"):
+        raise ValueError("--apply-rules supports v4/v5 only")
     if not VIDEOS_PATH.exists():
         return pd.DataFrame()
     df = pd.read_parquet(VIDEOS_PATH)
@@ -295,6 +333,18 @@ def score_existing_shorts(bundle) -> pd.DataFrame:
     sub = df.loc[mask].copy()
     if sub.empty:
         return sub
+    if bundle.get("version") in ("v3", "v4", "v5"):
+        from src.ranking import attach_thumbnails, predict_frame
+        cache = pd.read_parquet(THUMB_FEATURES_PATH) if THUMB_FEATURES_PATH.exists() else None
+        enriched = attach_thumbnails(sub, cache=cache)
+        _, scores, percentiles = predict_frame(bundle, enriched)
+        sub["pred_score"] = scores
+        sub["pred_percentile"] = percentiles
+        if apply_rules:
+            from src.proxy_rules import ProxyRuleContext
+            context = rules_context if rules_context is not None else ProxyRuleContext(bundle)
+            sub = context.apply(enriched,sub,score_column="pred_score")
+        return sub.sort_values("pred_score", ascending=False)
     X_num = build_numeric_frame(sub)
     T = title_block(bundle, sub["title"].fillna("").astype(str).tolist())
     if is_v2(bundle) and THUMB_FEATURES_PATH.exists() and THUMB_EMBEDDINGS_PATH.exists():
@@ -320,6 +370,12 @@ def score_existing_shorts(bundle) -> pd.DataFrame:
     return sub.sort_values("pred_score", ascending=False)
 
 
+def _print_rule_adjustment(rec):
+    names = ", ".join(rec["rules_fired"]) or "none"
+    print(f"      adjusted_score={rec['adjusted_score']:+.3f}; adjusted rank={rec['adjusted_rank']}; "
+          f"delta={rec['rule_delta']:+.3f}; rules={names}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Predict Shorts performance from a draft title and optional thumbnail(s)."
@@ -338,7 +394,7 @@ def main() -> None:
     parser.add_argument(
         "--model",
         default="auto",
-        help="Which model to use: auto (v2 if present), v1, v2, or a joblib path.",
+        help="Which model to use: auto (v2 if present), v1, v2, v3, v4, v5, or a joblib path.",
     )
     parser.add_argument(
         "--thumbnail",
@@ -348,9 +404,22 @@ def main() -> None:
         help="Thumbnail image path or URL. Repeat to compare several thumbnails "
         "for one title, or pass one per title. Amazon URLs are refused.",
     )
+    parser.add_argument("--channel-id", default=None, help="Channel context for draft scoring (default: TestRun)")
+    parser.add_argument("--recent-median-views", type=float, default=None,
+                        help="Recent channel median views, known before posting (v3/v4/v5 only)")
+    parser.add_argument("--apply-rules", action="store_true",
+                        help="Add experimental adjusted_score/adjusted_rank fields for v4/v5; keep original scores")
     args = parser.parse_args()
+    if args.recent_median_views is not None and (not np.isfinite(args.recent_median_views) or args.recent_median_views < 0):
+        parser.error("--recent-median-views must be finite and nonnegative")
 
     bundle = load_bundle(args.model)
+    rules_context = None
+    if args.apply_rules:
+        if bundle.get("version") not in ("v4", "v5"):
+            parser.error("--apply-rules requires --model v4 or --model v5")
+        from src.proxy_rules import ProxyRuleContext
+        rules_context = ProxyRuleContext(bundle)
     when = parse_when(args.when)
     result = {
         "planned_post_time_africa_lagos": when.isoformat(),
@@ -382,7 +451,7 @@ def main() -> None:
                 sys.exit("Pass a title when comparing thumbnails.")
             else:
                 sys.exit("Pass one title and several --thumbnail flags, or one thumbnail per title.")
-            if not is_v2(bundle):
+            if not is_v2(bundle) and bundle.get("version") not in ("v3", "v4", "v5"):
                 print("Warning: v1 ignores thumbnails. Use --model v2.", file=sys.stderr)
                 thumbs = None
             table = predict_scores(
@@ -391,6 +460,10 @@ def main() -> None:
                 duration=args.duration,
                 when=when,
                 subscribers=args.subscribers,
+                channel_id=args.channel_id,
+                recent_median_views=args.recent_median_views,
+                apply_rules=args.apply_rules,
+                rules_context=rules_context,
                 thumb_paths=thumbs,
             )
             # Keep the original thumbnail spec in the table for display.
@@ -398,7 +471,7 @@ def main() -> None:
                 # predict_scores sorts by score; map back by joining on row order after re-sort.
                 # Easier: attach specs in the unsorted order then sort.
                 pass
-            result["drafts"] = table.to_dict(orient="records")
+            result["drafts"] = table.astype(object).where(pd.notna(table), None).to_dict(orient="records")
             if not args.json:
                 print(f"Planned post time: {when.strftime('%Y-%m-%d %H:%M')} Africa/Lagos")
                 print(
@@ -416,13 +489,18 @@ def main() -> None:
                         f"implied views ~{rec['implied_views_at_14d']:.0f} at 14d  {flag}"
                     )
                     print(f"      {rec['title']}{thumb_s}")
+                    if args.apply_rules:
+                        _print_rule_adjustment(rec)
+                    if bundle.get("version") in ("v3", "v4", "v5"):
+                        print(f"      ranking_score={rec['ranking_score']:+.3f}; confidence={rec['confidence']}: {rec['reliability_note']}")
                 print()
-                print(
-                    "Score is predicted log-views vs this channel's typical Short, "
-                    "after a simple age adjustment. Percentile is vs other niche Shorts "
-                    "the model has scored. Implied views are a rough 14-day translation "
-                    "using TestRun's own median, not a guarantee."
-                )
+                if bundle.get("version") not in ("v3", "v4", "v5"):
+                    print(
+                        "Score is predicted log-views vs this channel's typical Short, "
+                        "after a simple age adjustment. Percentile is vs other niche Shorts "
+                        "the model has scored. Implied views are a rough 14-day translation "
+                        "using TestRun's own median, not a guarantee."
+                    )
                 if is_v2(bundle) and thumbs and any(t is None for t in thumbs):
                     print("Rows without a thumbnail used the training-set average thumbnail.")
         elif args.titles:
@@ -432,9 +510,13 @@ def main() -> None:
                 duration=args.duration,
                 when=when,
                 subscribers=args.subscribers,
+                channel_id=args.channel_id,
+                recent_median_views=args.recent_median_views,
+                apply_rules=args.apply_rules,
+                rules_context=rules_context,
                 thumb_paths=None,
             )
-            result["drafts"] = table.to_dict(orient="records")
+            result["drafts"] = table.astype(object).where(pd.notna(table), None).to_dict(orient="records")
             if not args.json:
                 print(f"Planned post time: {when.strftime('%Y-%m-%d %H:%M')} Africa/Lagos")
                 print(
@@ -452,16 +534,34 @@ def main() -> None:
                         f"implied views ~{rec['implied_views_at_14d']:.0f} at 14d  {flag}"
                     )
                     print(f"      {rec['title']}")
+                    if args.apply_rules:
+                        _print_rule_adjustment(rec)
+                    if bundle.get("version") in ("v3", "v4", "v5"):
+                        reliability = rec['comparison_reliability']
+                        pair_text = f"{reliability:.0%}" if np.isfinite(reliability) else "unavailable"
+                        print(f"      ranking_score={rec['ranking_score']:+.3f}; confidence={rec['confidence']}; pair reliability={pair_text}; "
+                              f"relative error (80% validation) ±{rec['relative_error_80pct']:.2f}")
+                        print(f"      {rec['reliability_note']}")
                 print()
-                print(
-                    "Score is predicted log-views vs this channel's typical Short, "
-                    "after a simple age adjustment. Percentile is vs other niche Shorts "
-                    "the model has scored. Implied views are a rough 14-day translation "
-                    "using TestRun's own median, not a guarantee."
-                )
+                if bundle.get("version") not in ("v3", "v4", "v5"):
+                    print(
+                        "Score is predicted log-views vs this channel's typical Short, "
+                        "after a simple age adjustment. Percentile is vs other niche Shorts "
+                        "the model has scored. Implied views are a rough 14-day translation "
+                        "using TestRun's own median, not a guarantee."
+                    )
+
+        if bundle.get("version") in ("v3", "v4", "v5") and args.titles and not args.json:
+            print(f"{bundle.get('version')} orders by ranking_score; score is a validation-calibrated relative log-view estimate.")
+            print("Percentiles use inner-validation predictions. Pair reliability is empirical, not a forecast guarantee.")
+            if bundle.get("version") == "v5" and not bundle.get("selected_groups"):
+                print("New public-prior and emotional ranking features were not retained; v5 uses v4 ranking.")
+                print("JSON emotional_triggers are descriptive cue scores, not measured human reactions.")
+            if not thumb_specs:
+                print("Thumbnail missing: cheap image features were imputed; no CLIP model was loaded.")
 
         if args.score_existing or not (args.titles or thumb_specs):
-            existing = score_existing_shorts(bundle)
+            existing = score_existing_shorts(bundle, apply_rules=args.apply_rules, rules_context=rules_context)
             if existing.empty:
                 print("No TestRun videos found in the dataset.")
             else:
@@ -485,6 +585,8 @@ def main() -> None:
                         "thumb_face_detected",
                         "clip_text_overlay",
                         "clip_bright_bold",
+                        "adjusted_score", "adjusted_rank", "rule_delta", "unclipped_rule_delta",
+                        "rules_fired", "rule_score_clipped", "proxy_rule_context",
                     ]
                     if c in existing.columns
                 ]
@@ -510,7 +612,11 @@ def main() -> None:
                             f"actual views={views_s}  age={age_s}{extra}"
                         )
                         print(f"      {rec['title']}")
+                        if args.apply_rules:
+                            _print_rule_adjustment(rec)
 
+        if args.apply_rules and not args.json:
+            print("Rules add adjusted_score/adjusted_rank only; original ordering, percentiles and view estimates are unchanged.")
         if args.json:
             print(json.dumps(result, indent=2, default=str))
     finally:

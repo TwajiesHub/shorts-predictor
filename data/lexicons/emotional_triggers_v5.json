@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "interpretation": "Hand-authored title-cue heuristics, not measured human reactions or causal view weights.",
+  "normalization": "For each trigger: sum weight * min(regex match count, 2); cap at 4 and divide by 4. Case-insensitive; curly apostrophes normalized.",
+  "per_pattern_match_cap": 2,
+  "score_cap": 4.0,
+  "rules": {
+    "curiosity_gap": [
+      {
+        "pattern": "\\bwhy\\b",
+        "weight": 1
+      },
+      {
+        "pattern": "\\bhow\\b",
+        "weight": 0.7
+      },
+      {
+        "pattern": "\\b(?:secret|hidden|mystery|discover)\\b",
+        "weight": 1
+      },
+      {
+        "pattern": "\\b(?:what happens|nobody tells|did you know|the truth about)\\b",
+        "weight": 1.5
+      },
+      {
+        "pattern": "\\?",
+        "weight": 0.5
+      }
+    ],
+    "urgency_scarcity": [
+      {
+        "pattern": "\\b(?:now|today|hurry|urgent|deadline)\\b",
+        "weight": 1
+      },
+      {
+        "pattern": "\\b(?:last chance|limited time|before it.s gone|running out)\\b",
+        "weight": 1.5
+      },
+      {
+        "pattern": "\\bonly\\s+\\d+\\s+(?:left|remaining)\\b",
+        "weight": 1.5
+      }
+    ],
+    "fomo": [
+      {
+        "pattern": "\\b(?:don.t miss|missing out|you.re missing|everyone is|everyone.s using|before everyone)\\b",
+        "weight": 1.5
+      },
+      {
+        "pattern": "\\b(?:must see|must know|need to know|still using)\\b",
+        "weight": 1
+      }
+    ],
+    "surprise_shock": [
+      {
+        "pattern": "\\b(?:shocking|unexpected|unbelievable|surprising|insane|mind.blowing)\\b",
+        "weight": 1.5
+      },
+      {
+        "pattern": "\\b(?:wait for it|plot twist|can.t believe|won.t believe)\\b",
+        "weight": 1.5
+      },
+      {
+        "pattern": "\\bactually\\b",
+        "weight": 0.5
+      }
+    ],
+    "relatability": [
+      {
+        "pattern": "\\b(?:we all|we.ve all|anyone else|me when|this is me|that feeling|every time)\\b",
+        "weight": 1.5
+      },
+      {
+        "pattern": "\\b(?:when you|if you|your struggle|your problem)\\b",
+        "weight": 1
+      }
+    ],
+    "status_superiority": [
+      {
+        "pattern": "\\b(?:smarter|genius|expert|elite|master|superior)\\b",
+        "weight": 1
+      },
+      {
+        "pattern": "\\b(?:like a pro|level up|better than|top 1\\s*%|only experts)\\b",
+        "weight": 1.5
+      }
+    ],
+    "humor": [
+      {
+        "pattern": "\\b(?:funny|hilarious|lol|lmao|haha|bruh|meme)\\b",
+        "weight": 1.5
+      },
+      {
+        "pattern": "\\bpov\\b",
+        "weight": 0.5
+      },
+      {
+        "pattern": "[😂🤣]",
+        "weight": 1
+      }
+    ],
+    "controversy_outrage": [
+      {
+        "pattern": "\\b(?:scam|exposed|unfair|outrage|hate|controversial|ripoff|lying|lies|lie)\\b",
+        "weight": 1.5
+      },
+      {
+        "pattern": "\\b(?:they don.t want|stop believing|you.ve been lied)\\b",
+        "weight": 1.5
+      }
+    ],
+    "direct_address": [
+      {
+        "pattern": "\\b(?:you|your|you.re|you.ve|yourself)\\b",
+        "weight": 1
+      }
+    ],
+    "numbers_lists": [
+      {
+        "pattern": "\\d+(?:\\.\\d+)?",
+        "weight": 0.5
+      },
+      {
+        "pattern": "^\\s*\\d+\\b",
+        "weight": 1
+      },
+      {
+        "pattern": "\\b\\d+\\s+(?:tips|ways|reasons|mistakes|tricks|facts|steps|things)\\b",
+        "weight": 1.5
+      }
+    ]
+  }
+}

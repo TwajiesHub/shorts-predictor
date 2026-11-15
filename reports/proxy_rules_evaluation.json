@@ -1,0 +1,162 @@
+{
+  "protocol": {
+    "model": "v5",
+    "rows": 980,
+    "prediction_cache": "heldout_predictions_v5.parquet",
+    "prediction_cache_created_this_run": false,
+    "retraining": false,
+    "defaults_changed": false,
+    "score": "calibrated relative R; R-prime is independent, uncalibrated post-processing",
+    "references": "Existing fitting-only same-channel prior OOF reference and historical profiles",
+    "unknown_context": "Skip gates needing unavailable data; missing thumbnail is unknown, not poor",
+    "limitations": [
+      "Existing reused development holdout, not a prospective/causal test",
+      "Outrage-style prevalence is a proxy, not a measured toxicity label",
+      "Approximate history dates are not exact historical exposure/outcome times"
+    ]
+  },
+  "thresholds": {
+    "emotion_high": 0.7,
+    "emotion_low": 0.3,
+    "prior_high": 70.0,
+    "prior_low": 30.0,
+    "prior_min_history": 5,
+    "profile_min_history": 20,
+    "recent_min_history": 5,
+    "recent_limit": 20,
+    "curiosity_high": 0.7,
+    "outrage_high": 0.7,
+    "outrage_style_fraction": 0.2,
+    "similarity_high": 0.8,
+    "thumbnail_brightness_low": 0.15,
+    "thumbnail_brightness_high": 0.85,
+    "thumbnail_contrast_low": 0.1,
+    "thumbnail_edges_low": 0.02,
+    "thumbnail_bad_checks": 2,
+    "clip_low": -3.0,
+    "clip_high": 3.0
+  },
+  "weights": {
+    "high_emotion_high_prior": 0.08,
+    "low_emotion_low_prior": -0.06,
+    "curiosity_sweet_spot": 0.05,
+    "outrage_outside_usual_style": -0.04,
+    "many_triggers_poor_thumbnail": -0.03,
+    "no_triggers_similar_title": -0.04
+  },
+  "with_thumbnail": {
+    "original": {
+      "n": 980,
+      "spearman": 0.3037112176128674,
+      "all_pairs_accuracy": 0.6053814463940222,
+      "all_pairs": 479648,
+      "within_channel_accuracy": 0.5973656256639048,
+      "within_channel_pairs": 23535,
+      "channel_macro_accuracy": 0.6175731080884085
+    },
+    "adjusted": {
+      "n": 980,
+      "spearman": 0.3055124752885306,
+      "all_pairs_accuracy": 0.6062028821135499,
+      "all_pairs": 479648,
+      "within_channel_accuracy": 0.5994476311875929,
+      "within_channel_pairs": 23535,
+      "channel_macro_accuracy": 0.6163184538232406
+    },
+    "delta_percentage_points": {
+      "all_pairs_accuracy": 0.08214357195276412,
+      "within_channel_accuracy": 0.20820055236880908,
+      "channel_macro_accuracy": -0.12546542651679093
+    },
+    "adjusted_rows": 295,
+    "clipped_rows": 4,
+    "rule_firings": {
+      "high_emotion_high_prior": 2,
+      "low_emotion_low_prior": 289,
+      "curiosity_sweet_spot": 0,
+      "outrage_outside_usual_style": 0,
+      "many_triggers_poor_thumbnail": 0,
+      "no_triggers_similar_title": 0
+    },
+    "unavailable_prior_rows": 2,
+    "unavailable_sweet_spot_rows": 408,
+    "unavailable_outrage_style_rows": 408,
+    "clip_only": {
+      "n": 980,
+      "spearman": 0.3036975722510776,
+      "all_pairs_accuracy": 0.6053772766695577,
+      "all_pairs": 479648,
+      "within_channel_accuracy": 0.5972806458466114,
+      "within_channel_pairs": 23535,
+      "channel_macro_accuracy": 0.6175247287947463
+    },
+    "paired_channel_bootstrap": {
+      "within_channel_lift_95pct": [
+        0.00011978534109724988,
+        0.004314737993287319
+      ],
+      "channel_macro_lift_95pct": [
+        -0.006526790698055584,
+        0.002236699379061407
+      ]
+    }
+  },
+  "no_thumbnail": {
+    "original": {
+      "n": 980,
+      "spearman": 0.25809410349305556,
+      "all_pairs_accuracy": 0.5884398558943225,
+      "all_pairs": 479648,
+      "within_channel_accuracy": 0.5758232419800298,
+      "within_channel_pairs": 23535,
+      "channel_macro_accuracy": 0.5793573796619517
+    },
+    "adjusted": {
+      "n": 980,
+      "spearman": 0.261426401088249,
+      "all_pairs_accuracy": 0.5894968810461004,
+      "all_pairs": 479648,
+      "within_channel_accuracy": 0.5773953685999575,
+      "within_channel_pairs": 23535,
+      "channel_macro_accuracy": 0.5806980497395753
+    },
+    "delta_percentage_points": {
+      "all_pairs_accuracy": 0.10570251517779683,
+      "within_channel_accuracy": 0.15721266199277828,
+      "channel_macro_accuracy": 0.1340670077623618
+    },
+    "adjusted_rows": 295,
+    "clipped_rows": 4,
+    "rule_firings": {
+      "high_emotion_high_prior": 2,
+      "low_emotion_low_prior": 289,
+      "curiosity_sweet_spot": 0,
+      "outrage_outside_usual_style": 0,
+      "many_triggers_poor_thumbnail": 0,
+      "no_triggers_similar_title": 0
+    },
+    "unavailable_prior_rows": 2,
+    "unavailable_sweet_spot_rows": 408,
+    "unavailable_outrage_style_rows": 408,
+    "clip_only": {
+      "n": 980,
+      "spearman": 0.258089993532251,
+      "all_pairs_accuracy": 0.5884377710320902,
+      "all_pairs": 479648,
+      "within_channel_accuracy": 0.575780752071383,
+      "within_channel_pairs": 23535,
+      "channel_macro_accuracy": 0.5793331900151205
+    },
+    "paired_channel_bootstrap": {
+      "within_channel_lift_95pct": [
+        -0.0015119661884054451,
+        0.005035433991242305
+      ],
+      "channel_macro_lift_95pct": [
+        -0.0005299610466281376,
+        0.0033273159909477062
+      ]
+    }
+  },
+  "model_sha256": "cece9eb919f6c441c19cab77fcf887c88339c50a8f4f5ca84cc278f060ced967"
+}
