@@ -1,0 +1,41 @@
+{
+  "planned_post_time_africa_lagos": "2026-11-16T10:00:00+01:00",
+  "duration": 30.0,
+  "model_version": "v2",
+  "model_path": "models/model_v2.joblib",
+  "drafts": [
+    {
+      "title": "Why Does My 128GB iPhone Only Show 113GB Free?",
+      "score": 0.697066730658054,
+      "niche_percentile": 90.20850367947669,
+      "implied_views_at_14d": 222.38850697644065,
+      "channel_median_views": 113.0,
+      "better_than_your_typical": true,
+      "rank": 1,
+      "thumbnail": "imputed",
+      "thumbnail_imputed": true
+    },
+    {
+      "title": "Your 128GB iPhone Is Lying About Its Storage",
+      "score": 0.509251841644518,
+      "niche_percentile": 83.46279640228946,
+      "implied_views_at_14d": 184.13727007835615,
+      "channel_median_views": 113.0,
+      "better_than_your_typical": true,
+      "rank": 2,
+      "thumbnail": "imputed",
+      "thumbnail_imputed": true
+    },
+    {
+      "title": "Why 128GB on iPhone Isn't Really 128GB",
+      "score": 0.38340050758441685,
+      "niche_percentile": 76.61488143908421,
+      "implied_views_at_14d": 162.24403301774683,
+      "channel_median_views": 113.0,
+      "better_than_your_typical": true,
+      "rank": 3,
+      "thumbnail": "imputed",
+      "thumbnail_imputed": true
+    }
+  ]
+}

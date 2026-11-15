@@ -1,0 +1,43 @@
+# Virtual environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.cache/
+.hf_home/
+huggingface/
+*.swp
+.DS_Store
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+
+# Regenerated / bulky local artifacts
+data/thumbnails/*
+!data/thumbnails/.gitkeep
+data/testrun_thumbs/**
+!data/testrun_thumbs/.gitkeep
+data/raw/
+data/*_before_missing.*
+data/*.log
+data/videos.csv
+data/thumbnails_manifest*.csv
+
+# Duplicate model copies (canonical files are models/model_v1.joblib and model_v2.joblib)
+models/model.joblib
+models/v1/
+models/v2/
+models/metrics.json
+models/cv/haarcascade_*.xml

@@ -1,0 +1,553 @@
+{
+  "dataset": {
+    "videos_total": 6492,
+    "channels_total": 35,
+    "eligible_ex_testrun": 4892,
+    "train": 3912,
+    "held_out": 980,
+    "testrun_eligible": 29,
+    "testrun_total": 36,
+    "min_age_days": 3.0,
+    "split": "channel_stratified",
+    "held_out_channels": 32
+  },
+  "age_effect": {
+    "intercept": -0.2328785180681839,
+    "log1p_age_coef": 0.07700218345285954
+  },
+  "metrics": {
+    "dummy_mean": {
+      "train": {
+        "n": 3912,
+        "spearman": null,
+        "spearman_pvalue": null,
+        "mae": 1.1113360864891118,
+        "r2": 0.0,
+        "pairwise_accuracy": 0.0
+      },
+      "held_out": {
+        "n": 980,
+        "spearman": null,
+        "spearman_pvalue": null,
+        "mae": 1.1725503510050996,
+        "r2": -0.0017283613056611191,
+        "pairwise_accuracy": 0.0
+      }
+    },
+    "ridge_numeric": {
+      "train": {
+        "n": 3912,
+        "spearman": 0.12188781001286045,
+        "spearman_pvalue": 2.014589521379657e-14,
+        "mae": 1.1118966108828814,
+        "r2": 0.03119260164938842,
+        "pairwise_accuracy": 0.5402701350675337
+      },
+      "held_out": {
+        "n": 980,
+        "spearman": 0.13848307425664483,
+        "spearman_pvalue": 1.3573363711595515e-05,
+        "mae": 1.1652369193950451,
+        "r2": 0.017378417406705537,
+        "pairwise_accuracy": 0.5532474033287449
+      }
+    },
+    "ridge_text": {
+      "train": {
+        "n": 3912,
+        "spearman": 0.20749259457557526,
+        "spearman_pvalue": 2.642692793329585e-39,
+        "mae": 1.0981869315482897,
+        "r2": 0.0657029639567892,
+        "pairwise_accuracy": 0.5752157058897086
+      },
+      "held_out": {
+        "n": 980,
+        "spearman": 0.10290229279725899,
+        "spearman_pvalue": 0.0012561816556469132,
+        "mae": 1.1887725483297322,
+        "r2": -0.016888836287167086,
+        "pairwise_accuracy": 0.5388464906793444
+      }
+    },
+    "mlp": {
+      "train": {
+        "n": 3912,
+        "spearman": 0.3775202151787768,
+        "spearman_pvalue": 9.541989317495162e-133,
+        "mae": 1.0303979378026615,
+        "r2": 0.17700760692428452,
+        "pairwise_accuracy": 0.6221082906089783
+      },
+      "held_out": {
+        "n": 980,
+        "spearman": 0.14235487108832698,
+        "spearman_pvalue": 7.694016293289793e-06,
+        "mae": 1.1764662659016296,
+        "r2": 0.0038096532328687482,
+        "pairwise_accuracy": 0.5413693829014895
+      },
+      "n_iter": 25
+    }
+  },
+  "time_split_metrics": {
+    "dummy_mean": {
+      "n": 979,
+      "spearman": null,
+      "spearman_pvalue": null,
+      "mae": 0.961906999606722,
+      "r2": -0.053079136905368474,
+      "pairwise_accuracy": 0.0
+    },
+    "ridge_text": {
+      "n": 979,
+      "spearman": 0.09464807857162197,
+      "spearman_pvalue": 0.003033578090411512,
+      "mae": 0.9794821258959681,
+      "r2": -0.10575833540919599,
+      "pairwise_accuracy": 0.5278125783011777
+    },
+    "mlp": {
+      "n": 979,
+      "spearman": 0.08001275519381182,
+      "spearman_pvalue": 0.012268187663277409,
+      "mae": 0.9612422223371389,
+      "r2": -0.09227356658803498,
+      "pairwise_accuracy": 0.5265597594587823
+    }
+  },
+  "deployed_model": "mlp",
+  "permutation_importance": [
+    {
+      "feature": "title_text_svd",
+      "spearman_drop_mean": 0.07867094025919646,
+      "spearman_drop_std": 0.029266416900815176
+    },
+    {
+      "feature": "hashtag_count",
+      "spearman_drop_mean": 0.01737612461614325,
+      "spearman_drop_std": 0.004743854426477539
+    },
+    {
+      "feature": "topic_network",
+      "spearman_drop_mean": 0.009745451912388101,
+      "spearman_drop_std": 0.0034664674126162905
+    },
+    {
+      "feature": "hour_missing",
+      "spearman_drop_mean": 0.007859119739574979,
+      "spearman_drop_std": 0.005420886286807788
+    },
+    {
+      "feature": "topic_charging",
+      "spearman_drop_mean": 0.006388152333494022,
+      "spearman_drop_std": 0.0037088130922108475
+    },
+    {
+      "feature": "log_duration",
+      "spearman_drop_mean": 0.006097015299470685,
+      "spearman_drop_std": 0.004006263710820526
+    },
+    {
+      "feature": "has_number",
+      "spearman_drop_mean": 0.0057643808350543654,
+      "spearman_drop_std": 0.0045009741213775595
+    },
+    {
+      "feature": "is_weekend",
+      "spearman_drop_mean": 0.005493201231405724,
+      "spearman_drop_std": 0.0017605931979197496
+    },
+    {
+      "feature": "title_len_chars",
+      "spearman_drop_mean": 0.004820637819935834,
+      "spearman_drop_std": 0.003062487288435921
+    },
+    {
+      "feature": "has_shorts_tag",
+      "spearman_drop_mean": 0.004686752906204419,
+      "spearman_drop_std": 0.003979838429701373
+    },
+    {
+      "feature": "starts_with_your",
+      "spearman_drop_mean": 0.00461385509474076,
+      "spearman_drop_std": 0.005618471634718052
+    },
+    {
+      "feature": "log_subscribers",
+      "spearman_drop_mean": 0.0031199045699987216,
+      "spearman_drop_std": 0.00672520226565966
+    },
+    {
+      "feature": "dow_sin",
+      "spearman_drop_mean": 0.003058636175140725,
+      "spearman_drop_std": 0.0012404248605239626
+    },
+    {
+      "feature": "starts_with_how",
+      "spearman_drop_mean": 0.0029233169082579988,
+      "spearman_drop_std": 0.004177114006959905
+    },
+    {
+      "feature": "topic_excel",
+      "spearman_drop_mean": 0.002594243623971225,
+      "spearman_drop_std": 0.0022803281624068222
+    },
+    {
+      "feature": "has_question",
+      "spearman_drop_mean": 0.002344700440747159,
+      "spearman_drop_std": 0.00393648002595972
+    },
+    {
+      "feature": "topic_review",
+      "spearman_drop_mean": 0.002090625498427822,
+      "spearman_drop_std": 0.003120850949718939
+    },
+    {
+      "feature": "dow_cos",
+      "spearman_drop_mean": 0.0014338861896682972,
+      "spearman_drop_std": 0.0028357327856949966
+    },
+    {
+      "feature": "duration",
+      "spearman_drop_mean": 0.0006473976854302517,
+      "spearman_drop_std": 0.003476977477259166
+    },
+    {
+      "feature": "topic_android",
+      "spearman_drop_mean": 0.0005282451722884579,
+      "spearman_drop_std": 0.004020413509256283
+    },
+    {
+      "feature": "topic_windows",
+      "spearman_drop_mean": 0.0005213969328538327,
+      "spearman_drop_std": 0.0032120820719225775
+    },
+    {
+      "feature": "has_exclamation",
+      "spearman_drop_mean": 0.00025076477399127786,
+      "spearman_drop_std": 0.006280384208332319
+    },
+    {
+      "feature": "date_is_coarse",
+      "spearman_drop_mean": 0.00010660192306788732,
+      "spearman_drop_std": 0.002410877053480462
+    },
+    {
+      "feature": "topic_python",
+      "spearman_drop_mean": 0.0,
+      "spearman_drop_std": 0.0
+    },
+    {
+      "feature": "topic_javascript",
+      "spearman_drop_mean": 0.0,
+      "spearman_drop_std": 0.0
+    },
+    {
+      "feature": "topic_iphone",
+      "spearman_drop_mean": -0.0005785814055449048,
+      "spearman_drop_std": 0.0034390683872559166
+    },
+    {
+      "feature": "topic_hidden",
+      "spearman_drop_mean": -0.0006307671575036984,
+      "spearman_drop_std": 0.0037922623596744922
+    },
+    {
+      "feature": "emoji_count",
+      "spearman_drop_mean": -0.0009374302675270486,
+      "spearman_drop_std": 0.005562702464906707
+    },
+    {
+      "feature": "topic_storage",
+      "spearman_drop_mean": -0.0009722659243950743,
+      "spearman_drop_std": 0.003083924759086242
+    },
+    {
+      "feature": "starts_with_why",
+      "spearman_drop_mean": -0.0015263398126242299,
+      "spearman_drop_std": 0.002384537794842055
+    },
+    {
+      "feature": "topic_privacy",
+      "spearman_drop_mean": -0.002457279632141641,
+      "spearman_drop_std": 0.00394296813470944
+    },
+    {
+      "feature": "title_len_words",
+      "spearman_drop_mean": -0.003005612920314104,
+      "spearman_drop_std": 0.0017057562856127185
+    },
+    {
+      "feature": "topic_why",
+      "spearman_drop_mean": -0.0064434450537510825,
+      "spearman_drop_std": 0.002430107964825233
+    },
+    {
+      "feature": "upload_hour",
+      "spearman_drop_mean": -0.00814936588091874,
+      "spearman_drop_std": 0.005486175770594324
+    }
+  ],
+  "title_term_drivers": {
+    "positive": [
+      {
+        "term": "wicked",
+        "coef": 1.9961254024506447
+      },
+      {
+        "term": "android wicked",
+        "coef": 1.7405768235523427
+      },
+      {
+        "term": "xr",
+        "coef": 1.6172927036825582
+      },
+      {
+        "term": "macbooktips",
+        "coef": 1.5864624471627686
+      },
+      {
+        "term": "iphonetips",
+        "coef": 1.585775720341789
+      },
+      {
+        "term": "iphone 16",
+        "coef": 1.537846485487616
+      },
+      {
+        "term": "mode",
+        "coef": 1.49002890923979
+      },
+      {
+        "term": "no",
+        "coef": 1.382267680522776
+      },
+      {
+        "term": "edition",
+        "coef": 1.3646087967231977
+      },
+      {
+        "term": "pixel 10a",
+        "coef": 1.3522859538853764
+      },
+      {
+        "term": "makemony",
+        "coef": 1.3324558416277654
+      },
+      {
+        "term": "life",
+        "coef": 1.306856775065637
+      },
+      {
+        "term": "manoj day",
+        "coef": 1.2754720215742972
+      },
+      {
+        "term": "show edition",
+        "coef": 1.2574549881097725
+      },
+      {
+        "term": "10a",
+        "coef": 1.1937484513451324
+      }
+    ],
+    "negative": [
+      {
+        "term": "trending",
+        "coef": -1.5678433029296002
+      },
+      {
+        "term": "youtubeshorts",
+        "coef": -1.3468436651072144
+      },
+      {
+        "term": "shortsfeed",
+        "coef": -1.314692395652441
+      },
+      {
+        "term": "reels",
+        "coef": -1.265192629018706
+      },
+      {
+        "term": "shorts",
+        "coef": -1.129600906069012
+      },
+      {
+        "term": "14",
+        "coef": -1.10419714319366
+      },
+      {
+        "term": "but",
+        "coef": -1.089749933173753
+      },
+      {
+        "term": "to buy",
+        "coef": -1.0392768398579937
+      },
+      {
+        "term": "night",
+        "coef": -1.023123064168029
+      },
+      {
+        "term": "challenge",
+        "coef": -0.9949863012935749
+      },
+      {
+        "term": "ai",
+        "coef": -0.9560897988709722
+      },
+      {
+        "term": "reels trending",
+        "coef": -0.928814070429914
+      },
+      {
+        "term": "android 16",
+        "coef": -0.9257052857868027
+      },
+      {
+        "term": "year",
+        "coef": -0.9251991850451928
+      },
+      {
+        "term": "14 print",
+        "coef": -0.9217209590045019
+      }
+    ]
+  },
+  "numeric_ridge_coefs": [
+    {
+      "feature": "title_len_chars",
+      "coef": -0.26283231167830695
+    },
+    {
+      "feature": "title_len_words",
+      "coef": 0.2447110318332681
+    },
+    {
+      "feature": "has_shorts_tag",
+      "coef": -0.15983297002077743
+    },
+    {
+      "feature": "starts_with_why",
+      "coef": 0.1484910473643448
+    },
+    {
+      "feature": "log_duration",
+      "coef": -0.10958844668584175
+    },
+    {
+      "feature": "topic_why",
+      "coef": -0.10723189783362216
+    },
+    {
+      "feature": "topic_android",
+      "coef": 0.09042968725030716
+    },
+    {
+      "feature": "has_exclamation",
+      "coef": -0.06289645532344963
+    },
+    {
+      "feature": "starts_with_how",
+      "coef": -0.06074178146125399
+    },
+    {
+      "feature": "date_is_coarse",
+      "coef": 0.054620765822933875
+    },
+    {
+      "feature": "log_subscribers",
+      "coef": 0.046374910235143264
+    },
+    {
+      "feature": "topic_review",
+      "coef": 0.04147242489595591
+    },
+    {
+      "feature": "starts_with_your",
+      "coef": 0.03863389797604285
+    },
+    {
+      "feature": "upload_hour",
+      "coef": 0.034285589649024485
+    },
+    {
+      "feature": "topic_privacy",
+      "coef": -0.03301640140380268
+    },
+    {
+      "feature": "topic_network",
+      "coef": 0.03108029203904546
+    },
+    {
+      "feature": "hashtag_count",
+      "coef": 0.029462683017083675
+    },
+    {
+      "feature": "dow_sin",
+      "coef": 0.028938474220614335
+    },
+    {
+      "feature": "topic_storage",
+      "coef": -0.02789831099793109
+    },
+    {
+      "feature": "dow_cos",
+      "coef": 0.022680637265790032
+    },
+    {
+      "feature": "topic_hidden",
+      "coef": -0.02103313971639801
+    },
+    {
+      "feature": "topic_iphone",
+      "coef": -0.01879162426707165
+    },
+    {
+      "feature": "has_question",
+      "coef": -0.015735898593846203
+    },
+    {
+      "feature": "has_number",
+      "coef": 0.011244221496030377
+    },
+    {
+      "feature": "is_weekend",
+      "coef": 0.011070825098280212
+    },
+    {
+      "feature": "emoji_count",
+      "coef": -0.010454361335029432
+    },
+    {
+      "feature": "topic_windows",
+      "coef": -0.01029487234116379
+    },
+    {
+      "feature": "topic_excel",
+      "coef": 0.0046322697497876465
+    },
+    {
+      "feature": "duration",
+      "coef": 0.00437032400696294
+    },
+    {
+      "feature": "topic_charging",
+      "coef": 0.0009412523766425667
+    },
+    {
+      "feature": "hour_missing",
+      "coef": 0.0002666045098740765
+    },
+    {
+      "feature": "topic_python",
+      "coef": 0.0
+    },
+    {
+      "feature": "topic_javascript",
+      "coef": 0.0
+    }
+  ],
+  "held_out_notes": "Official metrics use a per-channel random hold-out. Most public upload dates from the playlist API are coarse (often snapped to today's calendar day), so a time split is a weaker check."
+}

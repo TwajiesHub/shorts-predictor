@@ -1,0 +1,20 @@
+# Pinned to the versions used to train and evaluate v1/v2 (15 Nov 2026).
+yt-dlp==2026.10.26
+scikit-learn==1.9.1
+pandas==3.1.1
+numpy==2.5.4
+scipy==1.18.1
+joblib==1.6.0
+pyarrow==26.0.1
+pillow==13.0.0
+opencv-python-headless==5.0.0.93
+ftfy==6.3.1
+regex==2026.11.9
+huggingface_hub==2.4.0
+safetensors==0.8.0
+tqdm==4.70.1
+open-clip-torch==4.2.2
+# CPU wheels are enough to score titles and (slowly) extract CLIP features.
+#   pip install torch==2.15.0 torchvision==0.29.2 --index-url https://download.pytorch.org/whl/cpu
+torch==2.15.0
+torchvision==0.29.2
